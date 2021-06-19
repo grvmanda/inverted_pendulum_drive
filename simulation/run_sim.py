@@ -34,6 +34,7 @@ def main():
 
     plt.plot(tout, yout[:,0], tout, yout[:,1])
     plt.show()
+    plt.savefig("test.png")
 
     return
 
