@@ -1,6 +1,7 @@
 
 
 #include "BNO055.h"
+#include<unistd.h>
 
 using namespace std;
 
@@ -16,10 +17,12 @@ int main (int argc, char *argv[])
     cout << "err value: " << err << endl;
     cout << "err value: " << imuSens.status() << endl;
 
-    // while(1)
-    // {
-
-    // }
+    imu_data_t data;
+    while (1)
+    {
+        usleep(1000000);//sleeps for 3 second
+        imuSens.readIMU(&data);
+    }
 
     return 0;
 } 

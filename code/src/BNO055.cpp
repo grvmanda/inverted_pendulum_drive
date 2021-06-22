@@ -1,8 +1,40 @@
+/**
+ * @file BNO055.cpp
+ * @author Gaurav Manda (grvmanda@gmail.com)
+ * @brief Driver code for I2C based IMU sensor
+ * @version 1.0
+ * @date 2021-06-20
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
+
 
 #include "BNO055.h"
 
 using namespace std;
 
+/**
+ * @brief 
+ * 
+ * @param data 
+ * @param addr 
+ * @return error_codes 
+ */
+auto BNO055::_readByte(__s32 *data, __u8 addr) -> error_codes {
+
+    __s32 res; 
+    res = i2c_smbus_read_byte_data(this->_file, addr);
+    if (res < 0) {
+    /* ERROR HANDLING: i2c transaction failed */
+        return FAIL_TO_READ_BYTE;
+    } else {
+        // cout << "data: " << res << endl;
+        *data = res;
+        return NO_ERROR;
+    }
+
+}
 
 /**
  * @brief initialize the I2C driver
@@ -13,6 +45,7 @@ int BNO055::_init()
 {
     char filename[20];
     int error = 0;
+    __s32 res; 
 
     snprintf(filename, 19, "/dev/i2c-%d", this->_devId);
     cout << "filename " << filename << endl;
@@ -26,6 +59,7 @@ int BNO055::_init()
 
     if (ioctl(this->_file, I2C_SLAVE, this->_addr) < 0) {
     /* ERROR HANDLING; you can check errno to see what went wrong */
+        cout << "error: " << strerror(errno) << endl;
         this->_drvStatus = -2;
         return -1;
     }   
@@ -33,12 +67,20 @@ int BNO055::_init()
     this->_drvStatus = 0;
 
     /* Read out BTL version number for sanity check */
-    __s32 res; 
     res = i2c_smbus_read_byte_data(this->_file, REG_BL_Rev_ID);
     if (res < 0) {
     /* ERROR HANDLING: i2c transaction failed */
+        cout << "error: " << strerror(errno) << endl;
     } else {
         cout << "BTL ID " << res << endl;
+    }
+
+    /* Set CONFIG_MODE to IMU Fusion mode */
+    res = i2c_smbus_write_byte_data(this->_file, REG_ADDR_OPR_MODE, VALUE_OPR_MODE_IMU);
+    if (res < 0) {
+        cout << "error: " << strerror(errno) << endl;
+    } else {
+        cout << "wrote IMU config mode" << endl;
     }
 
     return error;
@@ -79,17 +121,35 @@ int BNO055::status()
 /**
  * @brief 
  * 
- * @return vector<int> 
+ * @param imu_data 
+ * @return error_codes 
  */
-void BNO055::readIMU()
+error_codes BNO055::readIMU(imu_data_t *imu_data)
 {
-    __u8 reg = 0x10;
+    __s32 lsbByte;
+    __s32 msbByte;
     __s32 res; 
-    /* Using SMBus commands */
-    res = i2c_smbus_read_word_data(this->_file, reg);
-    if (res < 0) {
-    /* ERROR HANDLING: i2c transaction failed */
-    } else {
-        cout << "IMU Data: " << res << endl;
-    }
+
+    BNO055::_readByte(&lsbByte, REG_EUL_Pitch_LSB);
+    BNO055::_readByte(&msbByte, REG_EUL_Pitch_MSB);
+
+    imu_data->pitch = ((double)((__s16) ((msbByte << 8) + lsbByte))) / 16;
+
+    BNO055::_readByte(&lsbByte, REG_EUL_Roll_LSB);
+    BNO055::_readByte(&msbByte, REG_EUL_Roll_MSB);
+
+    imu_data->roll = ((double)((__s16) ((msbByte << 8) + lsbByte))) / 16;
+
+    BNO055::_readByte(&lsbByte, REG_EUL_Heading_LSB);
+    BNO055::_readByte(&msbByte, REG_EUL_Heading_MSB);
+
+    imu_data->heading = ((double)((__s16) ((msbByte << 8) + lsbByte))) / 16;
+
+    cout << "-------------------------" << endl;
+
+    cout << "pitch " << imu_data->pitch << endl;
+    cout << "roll " << imu_data->roll << endl;
+    cout << "heading " << imu_data->heading << endl;
+
+    return NO_ERROR;
 }
