@@ -1,4 +1,13 @@
-
+/**
+ * @file main_alg.cpp
+ * @author Gaurav Manda (grvmanda@gmail.com)
+ * @brief 
+ * @version 1.0
+ * @date 2021-06-22
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
 
 #include "BNO055.h"
 #include<unistd.h>

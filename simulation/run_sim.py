@@ -27,7 +27,9 @@ def main():
     pend_model = pm.pendulum_model()
     updated_sys = _adjointSystem(pend_model)
 
-    t = np.linspace(0, 5, 501)
+    t_max = 10
+
+    t = np.linspace(0, t_max, t_max*100+1)
     r = 0.2*np.ones(np.size(t))
 
     yout, tout, xout = lsim(updated_sys, r, t)

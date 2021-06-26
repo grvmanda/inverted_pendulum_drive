@@ -3,12 +3,13 @@ from control.matlab import *
 
 class pendulum_model():
 
-    M = 0.5
-    m = 0.2
+    M = 0.04
+    m = 0.05
     b = 0.1
-    I = 0.006
+    L = 0.3048
+    l = L/2
+    I = 1/12 * M * L * L
     g = 9.8
-    l = 0.3
     
     p = 0
     A = np.zeros((4, 4))

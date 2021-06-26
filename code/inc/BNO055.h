@@ -1,3 +1,14 @@
+/**
+ * @file BNO055.h
+ * @author Gaurav Manda (grvmanda@gmail.com)
+ * @brief 
+ * @version 0.1
+ * @date 2021-06-22
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
+
 #ifndef _BNO055
 #define _BNO055
 
